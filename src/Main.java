@@ -1,5 +1,3 @@
-
-
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -18,7 +16,6 @@ public class Main {
             try {
                 int menyVal = scanner.nextInt();
                 scanner.nextLine();
-
                 switch (menyVal) {
                     case 1:
                         konto.läggTillTransaktion();
@@ -49,8 +46,6 @@ public class Main {
             }
         }
         scanner.close();
-
-
     }
 
     public static void visaMeny(){
@@ -64,5 +59,4 @@ public class Main {
         System.out.println("************************************************************");
         System.out.println("Tryck in ditt val (1-6): ");
     }
-
 }

@@ -6,18 +6,17 @@ import java.util.Locale;
 
 public class Transaktion {
     LocalDate datum;
-    double belopp;
+    int belopp;
     String typ;
     int vecka;
 
-
-    Transaktion(LocalDate datum, double belopp, String typ, int vecka){
+    Transaktion(LocalDate datum, int belopp, String typ, int vecka){
         this.datum = datum;
         this.belopp = belopp;
         this.typ = typ;
         this.vecka = vecka;
-
     }
+
     public DayOfWeek getDag(){
         return datum.getDayOfWeek();
     }
@@ -38,5 +37,4 @@ public class Transaktion {
     public String toString(){
         return datum + " V." + vecka + " | " + typ + " | " + belopp + "kr";
     }
-
 }

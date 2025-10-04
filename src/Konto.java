@@ -7,8 +7,8 @@ import java.util.InputMismatchException;
 import java.util.Locale;
 import java.util.Scanner;
 
-
 public class Konto {
+
     Scanner scanner = new Scanner(System.in);
     ArrayList<Transaktion> lista = new ArrayList<>();
     int saldo;
@@ -21,17 +21,23 @@ public class Konto {
     void läggTillTransaktion() {
 
         while (true) {
-
             LocalDate datum = null;
             int vecka = 0;
-            double belopp;
+            int belopp;
 
-            System.out.print("Ange belopp: ");
-            belopp = scanner.nextDouble();
-            scanner.nextLine();
-            if(belopp < 0 && belopp + saldo < 0) {
+            try {
+                System.out.print("Ange belopp: ");
+                belopp = scanner.nextInt();
+                scanner.nextLine();
+            } catch (InputMismatchException e) {
+                System.out.println("Fel typ av input, försök igen!");
+                scanner.nextLine();
+                continue;
+            }
+
+            if (belopp < 0 && belopp + saldo < 0) {
                 System.out.println("Du har inte tillräckligt med pengar, försök igen.");
-            }else{
+            } else {
                 saldo += belopp;
                 System.out.println("Ange datum (YYYY-MM-DD): ");
                 String inputDatum = scanner.nextLine();
@@ -41,6 +47,7 @@ public class Konto {
                     vecka = datum.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
                 } catch (DateTimeParseException exception) {
                     System.out.println("Felaktig input, ange YYYY-MM-DD");
+                    saldo -= belopp;
                     continue;
                 }
                 System.out.println("Ange typ (t.ex Lön/Mat/Hyra/Nöje)");
@@ -65,38 +72,46 @@ public class Konto {
 
     void visaSpenderadePengar() {
 
-        if(lista.isEmpty()){
+        if (lista.isEmpty()) {
             System.out.println("\n-------------------------------");
             System.out.println("Du har inte gjort några utlägg.");
             System.out.println("-------------------------------\n");
             return;
         }
         boolean utlägg = false;
-        for(Transaktion t : lista){
-            if(t.belopp < 0){
+        for (Transaktion t : lista) {
+            if (t.belopp < 0) {
                 utlägg = true;
                 break;
             }
         }
-        if(!utlägg){
+        if (!utlägg) {
             System.out.println("\n-------------------------------");
             System.out.println("Du har inte gjort några utlägg.");
             System.out.println("-------------------------------\n");
             return;
         }
-
+        lista.sort((t1, t2) -> t1.datum.compareTo(t2.datum));
         while (true) {
-
-            System.out.println("1.Årsvis\n2.Månadsvis\n3.Veckovis\n4.Dagvis\n5.Återgå till menyn");
-            double sumSpenderat = 0;
-            lista.sort((t1, t2) -> t1.datum.compareTo(t2.datum));
-
             try {
+                System.out.println("1.Årsvis\n2.Månadsvis\n3.Veckovis\n4.Dagvis\n5.Återgå till menyn");
                 int choice = scanner.nextInt();
                 scanner.nextLine();
+
+                if (choice < 1 || choice > 5) {
+                    System.out.println("Ogiltigt val. Välj mellan 1-5.");
+                    continue;
+                }
+
+                if (choice == 5) {
+                    return;
+                }
+
+                double sumSpenderat = 0;
                 for (Transaktion t : lista) {
                     if (t.belopp < 0) {
                         sumSpenderat -= t.belopp;
+
                         switch (choice) {
                             case 1:
                                 System.out.println(t.getÅr() + " | " + t.typ + " | " + t.belopp);
@@ -110,15 +125,10 @@ public class Konto {
                             case 4:
                                 System.out.println(t.getDag() + " | " + t.typ + " | " + t.belopp);
                                 break;
-                            case 5:
-                                return;
-                            default:
-                                System.out.println("Fel typ av input");
-                                break;
                         }
                     }
                 }
-                System.out.println("Du har totalt spenderat: " + sumSpenderat + "kr");
+                System.out.println("Du har totalt spenderat: " + sumSpenderat + "kr\n");
 
                 System.out.println("Vill du se en annan tidsenhet? (Y/N)");
                 String input = scanner.nextLine();
@@ -126,30 +136,23 @@ public class Konto {
                     return;
                 }
 
-
-
-            }catch (InputMismatchException e){
-                System.out.println("\n");
-                System.out.println("Fel typ av input, försök igen.");
-                System.out.println("\n");
+            } catch (InputMismatchException e) {
+                System.out.println("\nFel typ av input, försök igen.\n");
                 scanner.nextLine();
-
             }
         }
     }
 
+    void visaInkomst() {
 
-
-    void visaInkomst(){
-
-        if(lista.isEmpty()){
+        if (lista.isEmpty()) {
             System.out.println("\n-----------------------");
             System.out.println("Du har inga inkomster.");
             System.out.println("-----------------------\n");
             return;
         }
 
-        while(true){
+        while (true) {
 
             System.out.println("1.Årsvis\n2.Månadsvis\n3.Veckovis\n4.Dagvis\n5.Återgå till menyn");
             try {
@@ -161,7 +164,6 @@ public class Konto {
                 for (Transaktion t : lista) {
                     if (t.belopp > 0) {
                         sumInkomst += t.belopp;
-
                         switch (choice) {
                             case 1:
                                 System.out.println(t.getÅr() + " | " + t.typ + " | " + t.belopp);
@@ -183,8 +185,8 @@ public class Konto {
                         }
                     }
                 }
-                System.out.println("Total inkomst: " + sumInkomst + "kr");
 
+                System.out.println("Total inkomst: " + sumInkomst + "kr");
 
                 System.out.println("Vill du se en annan tidsenhet? (Y/N)");
                 String input = scanner.nextLine();
@@ -192,29 +194,24 @@ public class Konto {
                 } else {
                     return;
                 }
-
-            }catch (InputMismatchException exception){
+            } catch (InputMismatchException exception) {
                 System.out.println("\n");
                 System.out.println("Fel typ av input, försök igen!");
                 System.out.println("\n");
                 scanner.nextLine();
             }
-
         }
-
-
     }
-    void visaSaldo(){
+
+    void visaSaldo() {
         System.out.println("Totala saldo på ditt konto: " + saldo + "kr");
 
-
-        while (true){
+        while (true) {
             System.out.println("Ange Y för att återgå till menyn: ");
             String input = scanner.nextLine();
-            if(!input.equalsIgnoreCase("Y")){
+            if (!input.equalsIgnoreCase("Y")) {
                 System.out.println("Fel typ av input, vänligen försök igen!");
-            }
-            else {
+            } else {
                 break;
             }
         }
@@ -223,13 +220,14 @@ public class Konto {
     void raderaTransaktion() {
 
         int valTaBort = 0;
-        while(true) {
+        while (true) {
             if (lista.isEmpty()) {
                 System.out.println("\n");
                 System.out.println("Du har inte gjort några transaktion. Återgår till menyn.");
                 System.out.println("\n");
                 return;
             }
+
             lista.sort((t1, t2) -> t1.datum.compareTo(t2.datum));
             for (int i = 0; i < lista.size(); i++) {
                 System.out.println((i + 1) + ". " + lista.get(i));
@@ -240,7 +238,6 @@ public class Konto {
                 scanner.nextLine();
 
                 if (valTaBort >= 1 && valTaBort <= lista.size()) {
-
                     Transaktion transaktion = lista.remove(valTaBort - 1);
                     saldo -= transaktion.belopp;
                     System.out.println("Du har raderat: " + transaktion + "\n");
@@ -264,7 +261,7 @@ public class Konto {
                 } else {
                     System.out.println("Fel typ av input, vänligen försök igen!");
                 }
-            }catch (InputMismatchException e){
+            } catch (InputMismatchException e) {
                 System.out.println("Måste ange en siffra/siffror");
                 scanner.nextLine();
             }
